@@ -1,0 +1,1 @@
+export { jikanBaseUrl } from "./jikan";
