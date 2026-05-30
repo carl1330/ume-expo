@@ -1,6 +1,10 @@
-import { infiniteQueryOptions } from "@tanstack/react-query";
+import {
+  infiniteQueryOptions,
+  queryOptions,
+} from "@tanstack/react-query";
 import { getTopManga } from "./get-top-manga";
 import { getMangaSearch } from "./get-manga-search";
+import { getManga } from "./get-manga";
 
 export const mangaQueries = {
   all: () => ["manga"],
@@ -11,20 +15,23 @@ export const mangaQueries = {
       queryFn: ({ pageParam }) => getTopManga(pageParam, undefined, "manga"),
       initialPageParam: 1,
       getNextPageParam: (lastPage, _, lastPageParam) =>
-        lastPage.pagination.has_next_page
-          ? lastPageParam + 1
-          : undefined,
+        lastPage.pagination.has_next_page ? lastPageParam + 1 : undefined,
     }),
+  searches: () => [...mangaQueries.all(), "search"],
   search: (query: string) =>
     infiniteQueryOptions({
-      queryKey: [...mangaQueries.lists(), "search", query],
+      queryKey: [...mangaQueries.searches(), query],
       queryFn: ({ pageParam }) =>
-        getMangaSearch({ q: query, page: pageParam, sfw: true }),
+        getMangaSearch({ q: query, page: pageParam, sfw: true, type: "manga" }),
       initialPageParam: 1,
       getNextPageParam: (lastPage, _, lastPageParam) =>
-        lastPage.pagination.has_next_page
-          ? lastPageParam + 1
-          : undefined,
+        lastPage.pagination.has_next_page ? lastPageParam + 1 : undefined,
       enabled: query.length > 0,
+    }),
+  details: () => [...mangaQueries.all(), "detail"],
+  detail: (id: number) =>
+    queryOptions({
+      queryKey: [...mangaQueries.all(), id],
+      queryFn: () => getManga(id),
     }),
 };

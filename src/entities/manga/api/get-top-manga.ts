@@ -1,6 +1,6 @@
 import { JikanClient } from "@/shared/api";
-import { MangaWithPagination } from "./manga-with-pagination";
-import { TopMangaQuery } from "./models";
+import { mapJikanManga } from "../model/mapper";
+import type { MangaWithPagination, TopMangaQuery } from "../model/types";
 
 export const getTopManga = async (
   page: number,
@@ -18,13 +18,11 @@ export const getTopManga = async (
   const query: TopMangaQuery = { page, filter, type };
   const result = await JikanClient("/top/manga", { params: { query } });
 
-  const pagination = {
-    current_page: result.data?.pagination?.current_page ?? 1,
-    has_next_page: result.data?.pagination?.has_next_page ?? false,
-  };
-
   return {
-    manga: result.data?.data ?? [],
-    pagination,
+    manga: (result.data?.data ?? []).map((raw) => mapJikanManga(raw)),
+    pagination: {
+      current_page: result.data?.pagination?.current_page ?? 1,
+      has_next_page: result.data?.pagination?.has_next_page ?? false,
+    },
   };
 };

@@ -1,5 +1,5 @@
 import createClient from "openapi-fetch";
 import { jikanBaseUrl } from "@/shared/config";
-import type { paths } from "./v1";
+import type { paths } from "./__generated__/v1";
 
 export const { GET } = createClient<paths>({ baseUrl: jikanBaseUrl });

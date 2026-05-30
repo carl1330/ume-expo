@@ -1,10 +1,10 @@
-import { mangaQueries } from "@/shared/api";
-import { MangaCard } from "@/shared/ui/MangaCard";
+import { mangaQueries } from "@/entities/manga";
+import { MangaCard } from "@/entities/manga";
+import { View, Text, SafeScreen } from "@/shared/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ActivityIndicator, FlatList } from "react-native";
 
-export function ExplorePage() {
+export function HomePage() {
   const {
     data,
     error,
@@ -20,7 +20,7 @@ export function ExplorePage() {
   if (isLoading) return <ActivityIndicator style={{ padding: 16 }} />;
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+    <SafeScreen edges={["top"]}>
       <FlatList
         data={
           mangaList.length % 3 !== 0
@@ -28,18 +28,19 @@ export function ExplorePage() {
             : mangaList
         }
         keyExtractor={(item, index) =>
-          item ? String(item.mal_id) : `filler-${index}`
+          item ? String(item.malId) : `filler-${index}`
         }
         numColumns={3}
-        renderItem={({ item, index }) =>
+        renderItem={({ item }) =>
           item ? (
-            <MangaCard manga={item} index={index} />
+            <MangaCard manga={item} />
           ) : (
             <View style={{ flex: 1, margin: 4 }} />
           )
         }
         contentContainerStyle={{ padding: 4 }}
         style={{ flex: 1 }}
+        windowSize={3}
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) fetchNextPage();
         }}
@@ -50,6 +51,6 @@ export function ExplorePage() {
           ) : null
         }
       />
-    </SafeAreaView>
+    </SafeScreen>
   );
 }

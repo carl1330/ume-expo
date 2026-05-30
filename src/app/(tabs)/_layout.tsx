@@ -4,9 +4,9 @@ export default function TabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index" hidden />
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="binoculars.fill" md="explore" />
+      <NativeTabs.Trigger name="home">
+        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="library">
         <NativeTabs.Trigger.Label>Library</NativeTabs.Trigger.Label>
