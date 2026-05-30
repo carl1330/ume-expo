@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getMangaMetadata, listManga } from "@/shared/api";
-import type { Manga } from "../model/types";
+import { listManga } from "@/shared/api";
+import { getLocalMangaMetadata } from "./get-local-manga-metadata";
 
 export const localMangaQueries = {
   all: () => ["manga", "local"],
@@ -12,11 +12,7 @@ export const localMangaQueries = {
   metadata: (id: string) =>
     queryOptions({
       queryKey: [...localMangaQueries.all(), "metadata", id],
-      queryFn: async (): Promise<Manga | null> => {
-        const raw = await getMangaMetadata(id);
-        if (raw) return raw as Manga;
-        return null;
-      },
+      queryFn: () => getLocalMangaMetadata(id),
       retry: false,
     }),
 };
