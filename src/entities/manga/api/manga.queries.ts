@@ -34,4 +34,11 @@ export const mangaQueries = {
       queryKey: [...mangaQueries.all(), id],
       queryFn: () => getManga(id),
     }),
+  searchTop: (query: string) =>
+    queryOptions({
+      queryKey: [...mangaQueries.searches(), "top", query],
+      queryFn: () =>
+        getMangaSearch({ q: query, page: 1, limit: 10, sfw: true, type: "manga" }),
+      enabled: query.length > 0,
+    }),
 };

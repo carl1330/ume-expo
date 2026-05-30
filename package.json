@@ -49,5 +49,8 @@
     "lint": "expo lint",
     "generate:jikan": "npx openapi-typescript https://raw.githubusercontent.com/jikan-me/jikan-rest/master/storage/api-docs/api-docs.json -o src/shared/api/jikan/v1.d.ts"
   },
+  "overrides": {
+    "zod-validation-error": "^4.0.0"
+  },
   "private": true
 }

@@ -1,5 +1,4 @@
-import { mangaQueries } from "@/entities/manga";
-import { MangaCard } from "@/entities/manga";
+import { mangaQueries, MangaCard } from "@/entities/manga";
 import { View, Text, SafeScreen } from "@/shared/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ActivityIndicator, FlatList } from "react-native";

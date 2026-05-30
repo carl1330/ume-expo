@@ -1,12 +1,35 @@
-import { ImportButton, localMangaQueries, MangaCard } from "@/entities/manga";
+import {
+  localMangaQueries,
+  MangaCard,
+  useImportMangaDirectory,
+} from "@/entities/manga";
 import { Screen } from "@/shared/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FlatList, StyleSheet } from "react-native";
+import { Alert, FlatList, StyleSheet } from "react-native";
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 
 export function LibraryPage() {
   const queryClient = useQueryClient();
   const { data: ids = [] } = useQuery(localMangaQueries.list());
+  const { importDirectory, status, error, importedId } =
+    useImportMangaDirectory();
+
+  useEffect(() => {
+    if (status === "success" && importedId) {
+      queryClient.invalidateQueries({
+        queryKey: localMangaQueries.list().queryKey,
+      });
+    }
+  }, [status, importedId, queryClient]);
+
+  useEffect(() => {
+    if (status === "error" && error) {
+      Alert.alert("Import failed", error);
+    }
+  }, [status, error]);
+
+  const importing = status === "validating" || status === "importing";
 
   return (
     <Screen>
@@ -15,15 +38,16 @@ export function LibraryPage() {
           headerTitle: "",
           headerTransparent: true,
           headerShadowVisible: false,
-          headerRight: () => (
-            <ImportButton
-              onSuccess={() => {
-                queryClient.invalidateQueries({ queryKey: localMangaQueries.list().queryKey });
-              }}
-            />
-          ),
         }}
       />
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button
+          icon={importing ? "hourglass" : "plus"}
+          accessibilityLabel="Import manga"
+          disabled={importing}
+          onPress={importDirectory}
+        />
+      </Stack.Toolbar>
       <FlatList
         data={ids}
         keyExtractor={(id) => id}

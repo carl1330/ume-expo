@@ -13,4 +13,3 @@ export { volumeQueries } from "./api/volume.queries";
 export { useImportMangaDirectory, type ImportStatus } from "./api/use-import-manga-directory";
 export { useFillVolumeCovers } from "./api/use-fill-volume-covers";
 export { MangaCard } from "./ui/MangaCard";
-export { ImportButton } from "./ui/ImportButton";

@@ -8,8 +8,7 @@ import {
 } from "react-native";
 import { View, Text, TextInput, SafeScreen } from "@/shared/ui";
 import { Stack, useFocusEffect } from "expo-router";
-import { mangaQueries } from "@/entities/manga";
-import { MangaCard } from "@/entities/manga";
+import { mangaQueries, MangaCard } from "@/entities/manga";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 const useNativeSearchBar =
@@ -113,7 +112,7 @@ export function SearchPage() {
         ) : mangaList.length === 0 ? (
           <View style={styles.empty}>
             <Text color="secondary" style={styles.emptyText}>
-              No results found for "{debouncedQuery}"
+              No results found for &quot;{debouncedQuery}&quot;
             </Text>
           </View>
         ) : (
