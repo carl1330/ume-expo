@@ -31,6 +31,17 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: background },
           }}
         />
+        <Stack.Screen
+          name="manga/edit/[id]"
+          options={{
+            presentation: "formSheet",
+            headerShown: true,
+            gestureEnabled: true,
+            sheetGrabberVisible: true,
+            sheetAllowedDetents: [1.0],
+            contentStyle: { backgroundColor: background },
+          }}
+        />
       </Stack>
     </Providers>
   );

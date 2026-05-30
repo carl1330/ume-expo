@@ -3,12 +3,11 @@ import {
   useImportMangaDirectory,
   volumeQueries,
 } from "@/entities/manga";
-import { EditMetadataSheet } from "./EditMetadataSheet";
 import { SafeScreen, Text } from "@/shared/ui";
 import { spacing } from "@/shared/config";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Stack } from "expo-router";
-import { useEffect, useState } from "react";
+import { Stack, router } from "expo-router";
+import { useEffect } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -21,7 +20,6 @@ import { VolumeCarousel } from "./VolumeCarousel";
 
 export function LocalMangaDetails({ localId }: { localId: string }) {
   const queryClient = useQueryClient();
-  const [editOpen, setEditOpen] = useState(false);
   const { data: manga, isLoading } = useQuery(
     localMangaQueries.metadata(localId),
   );
@@ -62,7 +60,7 @@ export function LocalMangaDetails({ localId }: { localId: string }) {
         <Stack.Toolbar.Button
           icon="square.and.pencil"
           accessibilityLabel="Edit metadata"
-          onPress={() => setEditOpen(true)}
+          onPress={() => router.push(`/manga/edit/${localId}`)}
           separateBackground
         />
         <Stack.Toolbar.Button
@@ -76,11 +74,6 @@ export function LocalMangaDetails({ localId }: { localId: string }) {
         <MangaHeader manga={manga} />
         <VolumeCarousel mangaId={localId} />
       </ScrollView>
-      <EditMetadataSheet
-        manga={manga}
-        isOpen={editOpen}
-        onClose={() => setEditOpen(false)}
-      />
     </SafeScreen>
   );
 }

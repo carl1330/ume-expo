@@ -1,4 +1,8 @@
-import { downloadMangaCover, getMangaMetadata, saveMangaMetadata } from "@/shared/api";
+import {
+  downloadMangaCover,
+  getMangaMetadata,
+  saveMangaMetadata,
+} from "@/shared/api";
 import type { MangaMetadataFile } from "../model/types";
 
 export type JikanPreview = {
@@ -21,7 +25,10 @@ export async function updateMangaMetadata({
   malId,
   jikanPreview,
 }: UpdateInput): Promise<void> {
-  const existing = ((await getMangaMetadata(id)) ?? {}) as Partial<MangaMetadataFile>;
+  console.log(id, title, malId, jikanPreview);
+
+  const existing = ((await getMangaMetadata(id)) ??
+    {}) as Partial<MangaMetadataFile>;
 
   let coverUrl = existing.coverUrl ?? null;
   let score = existing.score ?? null;
@@ -33,7 +40,8 @@ export async function updateMangaMetadata({
     status = jikanPreview.status;
     authors = jikanPreview.authors;
     if (jikanPreview.coverUrl) {
-      coverUrl = await downloadMangaCover(id, jikanPreview.coverUrl);
+      const fileUri = await downloadMangaCover(id, jikanPreview.coverUrl);
+      coverUrl = `${fileUri}?v=${Date.now()}`;
     }
   }
 
