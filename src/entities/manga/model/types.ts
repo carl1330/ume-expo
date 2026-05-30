@@ -16,7 +16,6 @@ export type MokuroFile = {
   title: string;
 };
 
-export type VolumeDir = Directory;
 export type VolumePage = File;
 
 export type MangaWithPagination = {
@@ -27,6 +26,21 @@ export type MangaWithPagination = {
   };
 };
 
-export type TopMangaQuery = JikanOperations["getTopManga"]["parameters"]["query"];
-export type MangaSearchQuery = JikanOperations["getMangaSearch"]["parameters"]["query"];
+export type Volume = {
+  dir: Directory;
+  cover: string | null;
+};
+
+export type VolumeMetadata = {
+  cover: string | null;
+};
+
+export type MangaMetadataFile = Manga & {
+  volumes?: Record<string, VolumeMetadata>;
+};
+
+export type TopMangaQuery =
+  JikanOperations["getTopManga"]["parameters"]["query"];
+export type MangaSearchQuery =
+  JikanOperations["getMangaSearch"]["parameters"]["query"];
 export type MangaQuery = JikanOperations["getMangaById"]["parameters"]["path"];

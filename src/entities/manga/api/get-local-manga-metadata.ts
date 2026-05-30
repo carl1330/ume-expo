@@ -1,8 +1,9 @@
 import { getMangaMetadata } from "@/shared/api";
-import type { Manga } from "../model/types";
+import type { Manga, MangaMetadataFile } from "../model/types";
 
 export async function getLocalMangaMetadata(id: string): Promise<Manga | null> {
-  const raw = await getMangaMetadata(id);
-  if (raw) return raw as Manga;
-  return null;
+  const raw = (await getMangaMetadata(id)) as MangaMetadataFile | null;
+  if (!raw) return null;
+  const { volumes: _volumes, ...manga } = raw;
+  return manga;
 }

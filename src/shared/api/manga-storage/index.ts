@@ -1,5 +1,9 @@
 export { listManga } from "./list-manga";
-export { listVolumes } from "./list-volumes";
+export {
+  listVolumes,
+  getVolumeCoverFilename,
+  resolveVolumeCoverUri,
+} from "./list-volumes";
 export { getVolumePages } from "./get-volume-pages";
 export { getMangaMetadata } from "./get-manga-metadata";
 export { saveMangaMetadata } from "./save-manga-metadata";
