@@ -8,7 +8,12 @@ import { saveMangaMetadata } from "@/shared/api";
 import { readMokuroFile } from "./read-mokuro-file";
 import { syncMangaMetadataByTitle } from "./sync-manga-metadata";
 
-export type ImportStatus = "idle" | "validating" | "importing" | "error" | "success";
+export type ImportStatus =
+  | "idle"
+  | "validating"
+  | "importing"
+  | "error"
+  | "success";
 
 export function useImportMangaDirectory(targetId?: string) {
   const queryClient = useQueryClient();
@@ -30,7 +35,9 @@ export function useImportMangaDirectory(targetId?: string) {
 
       const mokuro = await readMokuroFile(dir);
       if (!mokuro) {
-        setError("No valid manga found. Directory must contain a subfolder with a .mokuro file.");
+        setError(
+          "No valid manga found. Directory must contain a subfolder with a .mokuro file.",
+        );
         setStatus("error");
         return;
       }
@@ -40,7 +47,6 @@ export function useImportMangaDirectory(targetId?: string) {
       if (!mangaLibraryDir.exists) mangaLibraryDir.create();
 
       if (targetId) {
-        // Import volumes into an existing manga's folder
         const destDir = new Directory(mangaLibraryDir, targetId);
         if (!destDir.exists) destDir.create();
 
@@ -56,7 +62,6 @@ export function useImportMangaDirectory(targetId?: string) {
         setImportedId(targetId);
         setStatus("success");
       } else {
-        // Create a new manga entry
         const { title_uuid: uuid, title } = mokuro;
 
         const destDir = new Directory(mangaLibraryDir, uuid);
