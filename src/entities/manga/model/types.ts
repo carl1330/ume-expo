@@ -1,4 +1,4 @@
-import type { Directory, File } from "expo-file-system";
+import type { Directory } from "expo-file-system";
 import type { JikanOperations } from "@/shared/api";
 
 export type Manga = {
@@ -36,8 +36,6 @@ export type MokuroBlock = {
 
 export type Line = [number, number];
 
-export type VolumePage = File;
-
 export type MangaWithPagination = {
   manga: Manga[];
   pagination: {
@@ -48,16 +46,23 @@ export type MangaWithPagination = {
 
 export type Volume = {
   dir: Directory;
-  cover: string | null;
+  uuid: string;
+  cover: string;
 };
 
-export type VolumeMetadata = {
-  cover: string | null;
+export type PageContent = {
+  uri: string;
+  width: number;
+  height: number;
+  blocks: MokuroBlock[];
 };
 
-export type MangaMetadataFile = Manga & {
-  volumes?: Record<string, VolumeMetadata>;
+export type VolumeContent = {
+  name: string;
+  pages: PageContent[];
 };
+
+export type MangaMetadataFile = Manga;
 
 export type TopMangaQuery =
   JikanOperations["getTopManga"]["parameters"]["query"];

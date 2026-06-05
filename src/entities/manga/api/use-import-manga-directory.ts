@@ -50,14 +50,7 @@ export function useImportMangaDirectory(targetId?: string) {
         const destDir = new Directory(mangaLibraryDir, targetId);
         if (!destDir.exists) destDir.create();
 
-        const subdirs = dir
-          .list()
-          .filter((e): e is Directory => e instanceof Directory);
-
-        for (const subdir of subdirs) {
-          const destSubdir = new Directory(destDir, subdir.name);
-          await subdir.copy(destSubdir);
-        }
+        await dir.copy(destDir);
 
         setImportedId(targetId);
         setStatus("success");
@@ -67,14 +60,7 @@ export function useImportMangaDirectory(targetId?: string) {
         const destDir = new Directory(mangaLibraryDir, uuid);
         if (!destDir.exists) destDir.create();
 
-        const subdirs = dir
-          .list()
-          .filter((e): e is Directory => e instanceof Directory);
-
-        for (const subdir of subdirs) {
-          const destSubdir = new Directory(destDir, subdir.name);
-          await subdir.copy(destSubdir);
-        }
+        await dir.copy(destDir);
 
         saveMangaMetadata(uuid, {
           id: uuid,

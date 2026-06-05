@@ -1,13 +1,13 @@
 import { spacing } from "@/shared/config";
 import { Text } from "@/shared/ui";
-import { useFillVolumeCovers, volumeQueries } from "@/entities/manga";
+import { volumeQueries } from "@/entities/manga";
 import { useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { VolumeCard } from "./VolumeCard";
 
 export function VolumeCarousel({ mangaId }: { mangaId: string }) {
   const { data: volumes = [] } = useQuery(volumeQueries.byManga(mangaId));
-  useFillVolumeCovers(mangaId, volumes);
 
   return (
     <View style={styles.section}>
@@ -20,7 +20,16 @@ export function VolumeCarousel({ mangaId }: { mangaId: string }) {
         contentContainerStyle={styles.list}
       >
         {volumes.map((volume) => (
-          <VolumeCard key={volume.dir.uri} cover={volume.cover ?? ""} />
+          <VolumeCard
+            key={volume.uuid}
+            cover={volume.cover}
+            onPress={() =>
+              router.push({
+                pathname: "/reader/[mangaId]/[volumeUuid]",
+                params: { mangaId, volumeUuid: volume.uuid },
+              })
+            }
+          />
         ))}
       </ScrollView>
     </View>

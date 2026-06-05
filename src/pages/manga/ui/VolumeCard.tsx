@@ -2,17 +2,24 @@ import { useColors } from "@/shared/config";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet } from "react-native";
 
-export function VolumeCard({ cover }: { cover: string }) {
+export function VolumeCard({
+  cover,
+  onPress,
+}: {
+  cover: string;
+  onPress: () => void;
+}) {
   const colors = useColors();
 
   return (
     <Pressable
-      onPress={() => {}}
+      onPress={onPress}
       style={({ pressed }) => [pressed && { opacity: 0.7 }]}
     >
       <Image
-        source={cover || null}
+        source={{ uri: cover }}
         contentFit="cover"
+        contentPosition="left"
         style={[styles.cover, { backgroundColor: colors.imagePlaceholder }]}
       />
     </Pressable>

@@ -1,8 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { Directory } from "expo-file-system";
-import { getVolumePages } from "@/shared/api";
-import type { VolumePage } from "../model/types";
 import { getMangaVolumes } from "./get-manga-volumes";
+import { getVolumeContent } from "./get-volume-content";
 
 export const volumeQueries = {
   all: () => ["volume"],
@@ -11,9 +10,9 @@ export const volumeQueries = {
       queryKey: [...volumeQueries.all(), id],
       queryFn: () => getMangaVolumes(id),
     }),
-  pages: (volumeDir: Directory) =>
+  content: (dir: Directory) =>
     queryOptions({
-      queryKey: [...volumeQueries.all(), "pages", volumeDir.uri],
-      queryFn: (): VolumePage[] => getVolumePages(volumeDir),
+      queryKey: [...volumeQueries.all(), "content", dir.uri],
+      queryFn: () => getVolumeContent(dir),
     }),
 };
