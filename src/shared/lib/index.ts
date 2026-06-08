@@ -1,1 +1,1 @@
-export { selectDirectory } from "./storage/select-directory";
+export { selectCbzFile } from "./storage/select-cbz-file";

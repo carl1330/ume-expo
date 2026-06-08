@@ -1,5 +1,8 @@
 import type { Line, MokuroBlock, MokuroFile, MokuroPage } from "../model/types";
 
+const DEFAULT_IMG_WIDTH = 1000;
+const DEFAULT_IMG_HEIGHT = 1400;
+
 export function parseMokuroFile(text: string): MokuroFile | null {
   let json: unknown;
   try {
@@ -36,13 +39,7 @@ export function parseMokuroFile(text: string): MokuroFile | null {
 function parsePage(raw: unknown): MokuroPage | null {
   if (!raw || typeof raw !== "object") return null;
   const p = raw as Record<string, unknown>;
-  if (
-    typeof p.version !== "string" ||
-    typeof p.img_width !== "number" ||
-    typeof p.img_height !== "number" ||
-    typeof p.img_path !== "string" ||
-    !Array.isArray(p.blocks)
-  ) {
+  if (typeof p.img_path !== "string" || !Array.isArray(p.blocks)) {
     return null;
   }
 
@@ -53,9 +50,10 @@ function parsePage(raw: unknown): MokuroPage | null {
   }
 
   return {
-    version: p.version,
-    img_width: p.img_width,
-    img_height: p.img_height,
+    version: typeof p.version === "string" ? p.version : undefined,
+    img_width: typeof p.img_width === "number" ? p.img_width : DEFAULT_IMG_WIDTH,
+    img_height:
+      typeof p.img_height === "number" ? p.img_height : DEFAULT_IMG_HEIGHT,
     img_path: p.img_path,
     blocks,
   };
@@ -64,20 +62,8 @@ function parsePage(raw: unknown): MokuroPage | null {
 function parseBlock(raw: unknown): MokuroBlock | null {
   if (!raw || typeof raw !== "object") return null;
   const b = raw as Record<string, unknown>;
-  if (
-    !isNumberTuple4(b.box) ||
-    typeof b.vertical !== "boolean" ||
-    typeof b.font_size !== "number" ||
-    !Array.isArray(b.lines_coords) ||
-    !Array.isArray(b.lines)
-  ) {
+  if (!isNumberTuple4(b.box) || !Array.isArray(b.lines)) {
     return null;
-  }
-
-  const linesCoords: [Line, Line, Line, Line][] = [];
-  for (const quad of b.lines_coords) {
-    const parsed = parseQuad(quad);
-    if (parsed) linesCoords.push(parsed);
   }
 
   const lines: string[] = [];
@@ -85,10 +71,19 @@ function parseBlock(raw: unknown): MokuroBlock | null {
     if (typeof line === "string") lines.push(line);
   }
 
+  let linesCoords: [Line, Line, Line, Line][] | undefined;
+  if (Array.isArray(b.lines_coords)) {
+    linesCoords = [];
+    for (const quad of b.lines_coords) {
+      const parsed = parseQuad(quad);
+      if (parsed) linesCoords.push(parsed);
+    }
+  }
+
   return {
     box: b.box,
-    vertical: b.vertical,
-    font_size: b.font_size,
+    vertical: typeof b.vertical === "boolean" ? b.vertical : false,
+    font_size: typeof b.font_size === "number" ? b.font_size : undefined,
     lines_coords: linesCoords,
     lines,
   };

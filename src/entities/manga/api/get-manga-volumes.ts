@@ -1,4 +1,4 @@
-import { Directory } from "expo-file-system";
+import { Directory, File } from "expo-file-system";
 import { mangaLibraryDir } from "@/shared/config";
 import type { Volume } from "../model/types";
 import { readMokuroFile } from "./read-mokuro-file";
@@ -20,10 +20,11 @@ export async function getMangaVolumes(id: string): Promise<Volume[]> {
 
       if (!firstPage) return null;
 
+      const segments = firstPage.img_path.split("/").filter(Boolean);
       return {
         dir,
         uuid: mokuro.volume_uuid,
-        cover: decodeURIComponent(dir.uri + firstPage.img_path),
+        cover: new File(dir, ...segments).uri,
       };
     }),
   );

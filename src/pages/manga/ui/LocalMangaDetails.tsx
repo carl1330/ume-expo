@@ -1,6 +1,6 @@
 import {
   localMangaQueries,
-  useImportMangaDirectory,
+  useImportManga,
   volumeQueries,
 } from "@/entities/manga";
 import { SafeScreen, Text } from "@/shared/ui";
@@ -23,8 +23,7 @@ export function LocalMangaDetails({ localId }: { localId: string }) {
   const { data: manga, isLoading } = useQuery(
     localMangaQueries.metadata(localId),
   );
-  const { importDirectory, status, error, importedId } =
-    useImportMangaDirectory(localId);
+  const { importManga, status, error, importedId } = useImportManga(localId);
 
   useEffect(() => {
     if (status === "success" && importedId) {
@@ -67,7 +66,7 @@ export function LocalMangaDetails({ localId }: { localId: string }) {
           icon={importing ? "hourglass" : "plus"}
           accessibilityLabel="Import volumes"
           disabled={importing}
-          onPress={importDirectory}
+          onPress={importManga}
         />
       </Stack.Toolbar>
       <ScrollView contentContainerStyle={styles.content}>

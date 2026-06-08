@@ -8,12 +8,15 @@ export async function getVolumeContent(dir: Directory): Promise<VolumeContent> {
     throw new Error(`No .mokuro file found in volume "${dir.name}"`);
   }
 
-  const pages: PageContent[] = mokuro.pages.map((page) => ({
-    uri: decodeURIComponent(dir.uri + page.img_path),
-    width: page.img_width,
-    height: page.img_height,
-    blocks: page.blocks,
-  }));
+  const pages: PageContent[] = mokuro.pages.map((page) => {
+    const segments = page.img_path.split("/").filter(Boolean);
+    return {
+      uri: new File(dir, ...segments).uri,
+      width: page.img_width,
+      height: page.img_height,
+      blocks: page.blocks,
+    };
+  });
 
   return { name: dir.name, pages };
 }

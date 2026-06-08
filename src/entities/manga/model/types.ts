@@ -19,7 +19,7 @@ export type MokuroFile = {
 };
 
 export type MokuroPage = {
-  version: string;
+  version?: string;
   img_width: number;
   img_height: number;
   img_path: string;
@@ -29,8 +29,8 @@ export type MokuroPage = {
 export type MokuroBlock = {
   box: [number, number, number, number];
   vertical: boolean;
-  font_size: number;
-  lines_coords: [Line, Line, Line, Line][];
+  font_size?: number;
+  lines_coords?: [Line, Line, Line, Line][];
   lines: string[];
 };
 

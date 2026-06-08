@@ -2,7 +2,7 @@ import {
   deleteManga,
   localMangaQueries,
   MangaCard,
-  useImportMangaDirectory,
+  useImportManga,
   volumeQueries,
 } from "@/entities/manga";
 import { Screen } from "@/shared/ui";
@@ -21,8 +21,7 @@ import { MenuView } from "@expo/ui/community/menu";
 export function LibraryPage() {
   const queryClient = useQueryClient();
   const { data: ids = [] } = useQuery(localMangaQueries.list());
-  const { importDirectory, status, error, importedId } =
-    useImportMangaDirectory();
+  const { importManga, status, error, importedId } = useImportManga();
 
   useEffect(() => {
     if (status === "success" && importedId) {
@@ -54,7 +53,7 @@ export function LibraryPage() {
           icon={importing ? "hourglass" : "plus"}
           accessibilityLabel="Import manga"
           disabled={importing}
-          onPress={importDirectory}
+          onPress={importManga}
         />
       </Stack.Toolbar>
       <FlatList

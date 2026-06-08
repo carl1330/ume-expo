@@ -1,4 +1,4 @@
-import { mangaQueries, useImportMangaDirectory } from "@/entities/manga";
+import { mangaQueries, useImportManga } from "@/entities/manga";
 import { findMangaByMalId } from "@/shared/api";
 import { SafeScreen, Text } from "@/shared/ui";
 import { spacing } from "@/shared/config";
@@ -29,8 +29,7 @@ export function RemoteMangaDetails({ malId }: { malId: number }) {
   }, [existingLocalId]);
 
   const { data: manga, isLoading } = useQuery(mangaQueries.detail(malId));
-  const { importDirectory, status, error, importedId } =
-    useImportMangaDirectory();
+  const { importManga, status, error, importedId } = useImportManga();
 
   useEffect(() => {
     if (status === "success" && importedId) {
@@ -67,7 +66,7 @@ export function RemoteMangaDetails({ malId }: { malId: number }) {
           icon={importing ? "hourglass" : "plus"}
           accessibilityLabel="Import volumes"
           disabled={importing}
-          onPress={importDirectory}
+          onPress={importManga}
         />
       </Stack.Toolbar>
       <ScrollView contentContainerStyle={styles.content}>

@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import * as SystemUI from "expo-system-ui";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Providers } from "@/shared/providers";
 import { mangaLibraryDir } from "@/shared/config";
 import { useColors } from "@/shared/config";
@@ -22,31 +23,35 @@ export default function RootLayout() {
   }, [colors.background]);
 
   return (
-    <Providers client={queryClient}>
-      <Stack
-        screenOptions={{ contentStyle: { backgroundColor: colors.background } }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="manga/[id]"
-          options={{
-            headerTransparent: true,
-            headerTitle: "",
-            headerBackButtonDisplayMode: "minimal",
-            headerBackButtonMenuEnabled: true,
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Providers client={queryClient}>
+        <Stack
+          screenOptions={{
+            contentStyle: { backgroundColor: colors.background },
           }}
-        />
-        <Stack.Screen
-          name="manga/edit/[id]"
-          options={{
-            presentation: "formSheet",
-            headerShown: true,
-            gestureEnabled: true,
-            sheetGrabberVisible: true,
-            sheetAllowedDetents: [1.0],
-          }}
-        />
-      </Stack>
-    </Providers>
+        >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="manga/[id]"
+            options={{
+              headerTransparent: true,
+              headerTitle: "",
+              headerBackButtonDisplayMode: "minimal",
+              headerBackButtonMenuEnabled: true,
+            }}
+          />
+          <Stack.Screen
+            name="manga/edit/[id]"
+            options={{
+              presentation: "formSheet",
+              headerShown: true,
+              gestureEnabled: true,
+              sheetGrabberVisible: true,
+              sheetAllowedDetents: [1.0],
+            }}
+          />
+        </Stack>
+      </Providers>
+    </GestureHandlerRootView>
   );
 }

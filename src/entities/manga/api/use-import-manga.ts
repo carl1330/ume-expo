@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
-import { Directory } from "expo-file-system";
+import { Directory, Paths } from "expo-file-system";
 import { useQueryClient } from "@tanstack/react-query";
-import { selectDirectory } from "@/shared/lib";
+import { selectCbzFile } from "@/shared/lib";
 import { mangaLibraryDir } from "@/shared/config";
 import { localMangaQueries } from "./manga-local.queries";
 import { saveMangaMetadata } from "@/shared/api";
 import { readMokuroFile } from "./read-mokuro-file";
 import { syncMangaMetadataByTitle } from "./sync-manga-metadata";
+import { extractCbz } from "./extract-cbz";
 
 export type ImportStatus =
   | "idle"
@@ -15,29 +16,31 @@ export type ImportStatus =
   | "error"
   | "success";
 
-export function useImportMangaDirectory(targetId?: string) {
+export function useImportManga(targetId?: string) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<ImportStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [importedId, setImportedId] = useState<string | null>(null);
 
-  const importDirectory = useCallback(async () => {
+  const importManga = useCallback(async () => {
     setStatus("validating");
     setError(null);
     setImportedId(null);
 
     try {
-      const dir = await selectDirectory();
-      if (!dir) {
+      const cbz = await selectCbzFile();
+      if (!cbz) {
         setStatus("idle");
         return;
       }
 
-      const mokuro = await readMokuroFile(dir);
+      const staging = makeStagingDir();
+      staging.create({ intermediates: true });
+      await extractCbz(cbz, staging);
+
+      const mokuro = await readMokuroFile(staging);
       if (!mokuro) {
-        setError(
-          "No valid manga found. Directory must contain a subfolder with a .mokuro file.",
-        );
+        setError("No valid manga found. Archive must contain a .mokuro file.");
         setStatus("error");
         return;
       }
@@ -50,7 +53,7 @@ export function useImportMangaDirectory(targetId?: string) {
         const destDir = new Directory(mangaLibraryDir, targetId);
         if (!destDir.exists) destDir.create();
 
-        await dir.copy(destDir);
+        await staging.copy(destDir);
 
         setImportedId(targetId);
         setStatus("success");
@@ -60,12 +63,12 @@ export function useImportMangaDirectory(targetId?: string) {
         const destDir = new Directory(mangaLibraryDir, uuid);
         if (!destDir.exists) destDir.create();
 
-        await dir.copy(destDir);
+        await staging.copy(destDir);
 
         saveMangaMetadata(uuid, {
           id: uuid,
           malId: null,
-          title: mokuro.title,
+          title,
           coverUrl: null,
           score: null,
           status: null,
@@ -87,5 +90,10 @@ export function useImportMangaDirectory(targetId?: string) {
     }
   }, [queryClient, targetId]);
 
-  return { importDirectory, status, error, importedId };
+  return { importManga, status, error, importedId };
+}
+
+function makeStagingDir(): Directory {
+  const id = `cbz-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return new Directory(Paths.cache, "cbz-import", id);
 }
