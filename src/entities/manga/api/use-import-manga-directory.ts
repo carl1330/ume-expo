@@ -3,7 +3,7 @@ import { Directory } from "expo-file-system";
 import { useQueryClient } from "@tanstack/react-query";
 import { selectDirectory } from "@/shared/lib";
 import { mangaLibraryDir } from "@/shared/config";
-import { localMangaQueries } from "@/entities/manga";
+import { localMangaQueries } from "./manga-local.queries";
 import { saveMangaMetadata } from "@/shared/api";
 import { readMokuroFile } from "./read-mokuro-file";
 import { syncMangaMetadataByTitle } from "./sync-manga-metadata";
