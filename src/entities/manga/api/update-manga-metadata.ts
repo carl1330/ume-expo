@@ -25,8 +25,6 @@ export async function updateMangaMetadata({
   malId,
   jikanPreview,
 }: UpdateInput): Promise<void> {
-  console.log(id, title, malId, jikanPreview);
-
   const existing = ((await getMangaMetadata(id)) ??
     {}) as Partial<MangaMetadataFile>;
 
