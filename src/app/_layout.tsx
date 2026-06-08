@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import * as SystemUI from "expo-system-ui";
 import { Providers } from "@/shared/providers";
 import { mangaLibraryDir } from "@/shared/config";
-import { useColors } from "@/shared/config/theme";
+import { useColors } from "@/shared/config";
 
 const queryClient = new QueryClient();
 
