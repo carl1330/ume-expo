@@ -2,7 +2,9 @@ import { volumeQueries, type Volume } from "@/entities/manga";
 import { SafeScreen, Text } from "@/shared/ui";
 import { spacing } from "@/shared/config";
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import PageRenderer from "./PageRenderer";
 
 export function ReaderPage({
   mangaId,
@@ -11,9 +13,7 @@ export function ReaderPage({
   mangaId: string;
   volumeUuid: string;
 }) {
-  const { data: volumes, isLoading } = useQuery(
-    volumeQueries.byManga(mangaId),
-  );
+  const { data: volumes, isLoading } = useQuery(volumeQueries.byManga(mangaId));
 
   if (isLoading) {
     return (
@@ -65,17 +65,16 @@ function VolumeReader({ volume }: { volume: Volume }) {
   }
 
   return (
-    <SafeScreen>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="titleSmall">{data.name}</Text>
-        <Text>Pages: {data.pages.length}</Text>
-        {data.pages.map((p, i) => (
-          <Text key={p.uri}>
-            {i + 1}. {p.width}x{p.height} · {p.blocks.length} blocks · {p.uri}
-          </Text>
-        ))}
-      </ScrollView>
-    </SafeScreen>
+    <GestureHandlerRootView>
+      <FlatList
+        data={data.pages}
+        renderItem={({ item: page }) => <PageRenderer pageContent={page} />}
+        pagingEnabled
+        inverted
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      />
+    </GestureHandlerRootView>
   );
 }
 

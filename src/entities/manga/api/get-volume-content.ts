@@ -9,7 +9,7 @@ export async function getVolumeContent(dir: Directory): Promise<VolumeContent> {
   }
 
   const pages: PageContent[] = mokuro.pages.map((page) => ({
-    uri: new File(dir, page.img_path).uri,
+    uri: decodeURIComponent(dir.uri + page.img_path),
     width: page.img_width,
     height: page.img_height,
     blocks: page.blocks,

@@ -6,6 +6,7 @@
     "@expo/material-symbols": "^0.1.1",
     "@expo/ui": "~56.0.15",
     "@expo/vector-icons": "^15.0.2",
+    "@likashefqet/react-native-image-zoom": "^4.3.0",
     "@tanstack/react-query": "^5.100.14",
     "expo": "~56.0.8",
     "expo-constants": "~56.0.16",
