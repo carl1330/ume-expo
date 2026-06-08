@@ -1,15 +1,15 @@
 import { Stack } from "expo-router";
 import { QueryClient } from "@tanstack/react-query";
-import { useColorScheme } from "react-native";
 import { useEffect } from "react";
+import * as SystemUI from "expo-system-ui";
 import { Providers } from "@/shared/providers";
 import { mangaLibraryDir } from "@/shared/config";
+import { useColors } from "@/shared/config/theme";
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-  const scheme = useColorScheme();
-  const background = scheme === "dark" ? "#000000" : "#ffffff";
+  const colors = useColors();
 
   useEffect(() => {
     if (!mangaLibraryDir.exists) {
@@ -17,9 +17,15 @@ export default function RootLayout() {
     }
   }, []);
 
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(colors.background);
+  }, [colors.background]);
+
   return (
     <Providers client={queryClient}>
-      <Stack>
+      <Stack
+        screenOptions={{ contentStyle: { backgroundColor: colors.background } }}
+      >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="manga/[id]"
@@ -28,7 +34,6 @@ export default function RootLayout() {
             headerTitle: "",
             headerBackButtonDisplayMode: "minimal",
             headerBackButtonMenuEnabled: true,
-            contentStyle: { backgroundColor: background },
           }}
         />
         <Stack.Screen
@@ -39,7 +44,6 @@ export default function RootLayout() {
             gestureEnabled: true,
             sheetGrabberVisible: true,
             sheetAllowedDetents: [1.0],
-            contentStyle: { backgroundColor: background },
           }}
         />
       </Stack>
