@@ -1,7 +1,16 @@
-import { volumeQueries, type Volume } from "@/entities/manga";
+import { volumeQueries, type Volume, type VolumeContent } from "@/entities/manga";
+import { updateLastPage } from "../api/update-last-page";
+import { progressQueries } from "../api/progress.queries";
 import { SafeScreen, Text } from "@/shared/ui";
-import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { VolumeProgress } from "@db/schema";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Stack } from "expo-router";
 import { useCallback, useRef, useState } from "react";
@@ -41,9 +50,53 @@ export function ReaderPage({
 }
 
 function VolumeReader({ volume }: { volume: Volume }) {
-  const { data, isLoading, error } = useQuery(
-    volumeQueries.content(volume.dir),
+  const content = useQuery(volumeQueries.content(volume.dir));
+  const progress = useQuery(progressQueries.byVolume(volume.uuid));
+
+  if (content.isLoading || progress.isLoading) {
+    return (
+      <SafeScreen>
+        <View style={styles.centered}>
+          <ActivityIndicator />
+        </View>
+      </SafeScreen>
+    );
+  }
+
+  if (content.error || !content.data) {
+    return (
+      <SafeScreen>
+        <View style={styles.centered}>
+          <Text>
+            Failed to load volume: {content.error?.message ?? "unknown"}
+          </Text>
+        </View>
+      </SafeScreen>
+    );
+  }
+
+  return (
+    <LoadedVolumeReader
+      volume={volume}
+      content={content.data}
+      initialPage={progress.data?.lastPage ?? 0}
+    />
   );
+}
+
+function LoadedVolumeReader({
+  volume,
+  content,
+  initialPage,
+}: {
+  volume: Volume;
+  content: VolumeContent;
+  initialPage: number;
+}) {
+  const { width } = useWindowDimensions();
+  const totalPages = content.pages.length;
+  const safeInitial = Math.min(initialPage, Math.max(totalPages - 1, 0));
+
   const [chromeVisible, setChromeVisible] = useState(false);
   const toggleChrome = useCallback(() => setChromeVisible((v) => !v), []);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -58,7 +111,8 @@ function VolumeReader({ volume }: { volume: Volume }) {
       toggleChrome();
     }, 280);
   }, [toggleChrome]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [currentIndex, setCurrentIndex] = useState(safeInitial);
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: { index: number | null }[] }) => {
       const i = viewableItems[0]?.index;
@@ -67,32 +121,48 @@ function VolumeReader({ volume }: { volume: Volume }) {
   ).current;
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 }).current;
 
-  if (isLoading) {
-    return (
-      <SafeScreen>
-        <View style={styles.centered}>
-          <ActivityIndicator />
-        </View>
-      </SafeScreen>
-    );
-  }
+  const queryClient = useQueryClient();
+  const updateProgress = useMutation({
+    mutationFn: updateLastPage,
+    onSuccess: ({ volumeUuid, page, totalPages }) => {
+      const isFinal = page >= totalPages - 1;
+      queryClient.setQueryData<VolumeProgress | null>(
+        progressQueries.byVolume(volumeUuid).queryKey,
+        (prev) =>
+          prev
+            ? {
+                ...prev,
+                lastPage: page,
+                updatedAt: new Date(),
+                completedAt: prev.completedAt ?? (isFinal ? new Date() : null),
+              }
+            : prev,
+      );
+    },
+  });
+  const handleMomentumScrollEnd = useCallback(() => {
+    updateProgress.mutate({
+      volumeUuid: volume.uuid,
+      page: currentIndex,
+      totalPages,
+    });
+  }, [updateProgress, volume.uuid, currentIndex, totalPages]);
 
-  if (error || !data) {
-    return (
-      <SafeScreen>
-        <View style={styles.centered}>
-          <Text>Failed to load volume: {error?.message ?? "unknown"}</Text>
-        </View>
-      </SafeScreen>
-    );
-  }
+  const getItemLayout = useCallback(
+    (_: ArrayLike<unknown> | null | undefined, index: number) => ({
+      length: width,
+      offset: width * index,
+      index,
+    }),
+    [width],
+  );
 
   return (
     <>
       <Stack.Screen
         options={{
           headerShown: chromeVisible,
-          headerTitle: `${currentIndex + 1} / ${data.pages.length}`,
+          headerTitle: `${currentIndex + 1} / ${totalPages}`,
           headerTransparent: true,
           headerShadowVisible: false,
         }}
@@ -106,7 +176,7 @@ function VolumeReader({ volume }: { volume: Volume }) {
       >
         <FlatList
           style={{ flex: 1 }}
-          data={data.pages}
+          data={content.pages}
           renderItem={({ item: page }) => <PageRenderer pageContent={page} />}
           pagingEnabled
           inverted
@@ -115,6 +185,9 @@ function VolumeReader({ volume }: { volume: Volume }) {
           contentInsetAdjustmentBehavior="never"
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          initialScrollIndex={safeInitial}
+          getItemLayout={getItemLayout}
         />
       </GestureDetector>
     </>

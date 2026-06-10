@@ -14,4 +14,5 @@ export { volumeQueries } from "./api/volume.queries";
 export { useImportManga, type ImportStatus } from "./api/use-import-manga";
 export { updateMangaMetadata, type JikanPreview } from "./api/update-manga-metadata";
 export { deleteManga } from "./api/delete-manga";
+export { createVolumeProgress } from "./api/create-volume-progress";
 export { MangaCard } from "./ui/MangaCard";

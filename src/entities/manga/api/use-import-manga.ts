@@ -8,6 +8,7 @@ import { saveMangaMetadata } from "@/shared/api";
 import { readMokuroFile } from "./read-mokuro-file";
 import { syncMangaMetadataByTitle } from "./sync-manga-metadata";
 import { extractCbz } from "./extract-cbz";
+import { createVolumeProgress } from "./create-volume-progress";
 
 export type ImportStatus =
   | "idle"
@@ -55,6 +56,12 @@ export function useImportManga(targetId?: string) {
 
         await staging.copy(destDir);
 
+        await createVolumeProgress({
+          volumeUuid: mokuro.volume_uuid,
+          mangaId: targetId,
+          totalPages: mokuro.pages.length,
+        });
+
         setImportedId(targetId);
         setStatus("success");
       } else {
@@ -64,6 +71,12 @@ export function useImportManga(targetId?: string) {
         if (!destDir.exists) destDir.create();
 
         await staging.copy(destDir);
+
+        await createVolumeProgress({
+          volumeUuid: mokuro.volume_uuid,
+          mangaId: uuid,
+          totalPages: mokuro.pages.length,
+        });
 
         saveMangaMetadata(uuid, {
           id: uuid,

@@ -8,6 +8,12 @@
       ],
       "@/assets/*": [
         "./assets/*"
+      ],
+      "@db/*": [
+        "./db/*"
+      ],
+      "@db/migrations": [
+        "./drizzle/migrations.js"
       ]
     }
   },

@@ -9,6 +9,7 @@ export type Manga = {
   score: number | null;
   status: string | null;
   authors: { id: number; name: string }[];
+  synopsis?: string | null;
 };
 
 export type MokuroFile = {
