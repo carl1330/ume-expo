@@ -1,35 +1,14 @@
-import { Directory, File } from "expo-file-system";
-import { mangaLibraryDir } from "@/shared/config";
+import { asc, eq } from "drizzle-orm";
+import { db } from "@/shared/lib";
+import { volume } from "@db/schema";
 import type { Volume } from "../model/types";
-import { readMokuroFile } from "./read-mokuro-file";
+import { volumeRowToVolume } from "./volume-row-to-volume";
 
-export async function getMangaVolumes(id: string): Promise<Volume[]> {
-  const mangaDir = new Directory(mangaLibraryDir, id);
-  if (!mangaDir.exists) return [];
-
-  const dirs = mangaDir
-    .list()
-    .filter((entry): entry is Directory => entry instanceof Directory);
-
-  const results = await Promise.all(
-    dirs.map(async (dir): Promise<Volume | null> => {
-      const mokuro = await readMokuroFile(dir);
-      if (!mokuro) return null;
-
-      const firstPage = mokuro.pages[0];
-
-      if (!firstPage) return null;
-
-      const segments = firstPage.img_path.split("/").filter(Boolean);
-      return {
-        dir,
-        uuid: mokuro.volume_uuid,
-        cover: new File(dir, ...segments).uri,
-      };
-    }),
-  );
-
-  return results
-    .filter((v): v is Volume => v !== null)
-    .sort((a, b) => a.dir.name.localeCompare(b.dir.name));
+export async function getMangaVolumes(mangaId: string): Promise<Volume[]> {
+  const rows = await db
+    .select()
+    .from(volume)
+    .where(eq(volume.mangaId, mangaId))
+    .orderBy(asc(volume.dirName));
+  return rows.map(volumeRowToVolume);
 }

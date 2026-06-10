@@ -1,9 +1,7 @@
-import {
-  downloadMangaCover,
-  getMangaMetadata,
-  saveMangaMetadata,
-} from "@/shared/api";
-import type { MangaMetadataFile } from "../model/types";
+import { eq, sql } from "drizzle-orm";
+import { db } from "@/shared/lib";
+import { manga } from "@db/schema";
+import { downloadMangaCover } from "./download-manga-cover";
 
 export type JikanPreview = {
   score: number | null;
@@ -25,34 +23,22 @@ export async function updateMangaMetadata({
   malId,
   jikanPreview,
 }: UpdateInput): Promise<void> {
-  const existing = ((await getMangaMetadata(id)) ??
-    {}) as Partial<MangaMetadataFile>;
-
-  let coverUrl = existing.coverUrl ?? null;
-  let score = existing.score ?? null;
-  let status = existing.status ?? null;
-  let authors = existing.authors ?? [];
+  const patch: Record<string, unknown> = {
+    title,
+    malId,
+    updatedAt: new Date(),
+  };
 
   if (jikanPreview) {
-    score = jikanPreview.score;
-    status = jikanPreview.status;
-    authors = jikanPreview.authors;
+    patch.score = jikanPreview.score;
+    patch.status = jikanPreview.status;
+    patch.authors = JSON.stringify(jikanPreview.authors);
+
     if (jikanPreview.coverUrl) {
-      const fileUri = await downloadMangaCover(id, jikanPreview.coverUrl);
-      coverUrl = `${fileUri}?v=${Date.now()}`;
+      await downloadMangaCover(id, jikanPreview.coverUrl);
+      patch.coverUpdatedAt = sql`(unixepoch())`;
     }
   }
 
-  const updated: MangaMetadataFile = {
-    ...existing,
-    id,
-    title,
-    malId,
-    coverUrl,
-    score,
-    status,
-    authors,
-  };
-
-  saveMangaMetadata(id, updated);
+  await db.update(manga).set(patch).where(eq(manga.id, id));
 }

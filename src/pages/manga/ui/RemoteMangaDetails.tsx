@@ -1,5 +1,8 @@
-import { mangaQueries, useImportManga } from "@/entities/manga";
-import { findMangaByMalId } from "@/shared/api";
+import {
+  findMangaByMalId,
+  mangaQueries,
+  useImportManga,
+} from "@/entities/manga";
 import { SafeScreen, Text } from "@/shared/ui";
 import { spacing } from "@/shared/config";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

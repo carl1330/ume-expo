@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { listManga } from "@/shared/api";
+import { listManga } from "./list-manga";
 import { getLocalMangaMetadata } from "./get-local-manga-metadata";
 
 export const localMangaQueries = {
@@ -7,7 +7,7 @@ export const localMangaQueries = {
   list: () =>
     queryOptions({
       queryKey: [...localMangaQueries.all(), "list"],
-      queryFn: (): string[] => listManga(),
+      queryFn: () => listManga(),
     }),
   metadata: (id: string) =>
     queryOptions({

@@ -3,7 +3,7 @@ import {
   localMangaQueries,
   MangaCard,
   useImportManga,
-  volumeQueries,
+  type Manga,
 } from "@/entities/manga";
 import { Screen } from "@/shared/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -20,7 +20,7 @@ import { MenuView } from "@expo/ui/community/menu";
 
 export function LibraryPage() {
   const queryClient = useQueryClient();
-  const { data: ids = [] } = useQuery(localMangaQueries.list());
+  const { data: manga = [] } = useQuery(localMangaQueries.list());
   const { importManga, status, error, importedId } = useImportManga();
 
   useEffect(() => {
@@ -57,10 +57,10 @@ export function LibraryPage() {
         />
       </Stack.Toolbar>
       <FlatList
-        data={ids}
-        keyExtractor={(id) => id}
+        data={manga}
+        keyExtractor={(m) => m.id}
         numColumns={3}
-        renderItem={({ item }) => <LibraryMangaCard id={item} />}
+        renderItem={({ item }) => <LibraryMangaCard manga={item} />}
         contentContainerStyle={styles.list}
         contentInsetAdjustmentBehavior="automatic"
       />
@@ -71,31 +71,23 @@ export function LibraryPage() {
 const LIST_PADDING = 4;
 const COLUMNS = 3;
 
-function LibraryMangaCard({ id }: { id: string }) {
+function LibraryMangaCard({ manga }: { manga: Manga }) {
   const queryClient = useQueryClient();
   const { width: windowWidth } = useWindowDimensions();
   const cellWidth = (windowWidth - LIST_PADDING * 2) / COLUMNS;
-  const { data: manga } = useQuery(localMangaQueries.metadata(id));
-  const title = manga?.title ?? id;
 
   const confirmDelete = () => {
     Alert.alert(
       "Delete manga",
-      `Delete "${title}"? This cannot be undone.`,
+      `Delete "${manga.title}"? This cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
+          onPress: async () => {
             try {
-              deleteManga(id);
-              queryClient.removeQueries({
-                queryKey: localMangaQueries.metadata(id).queryKey,
-              });
-              queryClient.removeQueries({
-                queryKey: volumeQueries.byManga(id).queryKey,
-              });
+              await deleteManga(manga.id);
               queryClient.invalidateQueries({
                 queryKey: localMangaQueries.list().queryKey,
               });
@@ -111,10 +103,10 @@ function LibraryMangaCard({ id }: { id: string }) {
   return (
     <MenuView
       shouldOpenOnLongPress
-      title={title}
+      title={manga.title}
       onPressAction={({ nativeEvent }) => {
         if (nativeEvent.event === "edit") {
-          router.push(`/manga/edit/${id}`);
+          router.push(`/manga/edit/${manga.id}`);
         } else if (nativeEvent.event === "delete") {
           confirmDelete();
         }
@@ -130,19 +122,7 @@ function LibraryMangaCard({ id }: { id: string }) {
       ]}
     >
       <View style={{ width: cellWidth }}>
-        <MangaCard
-          manga={
-            manga ?? {
-              id,
-              malId: null,
-              title: id,
-              coverUrl: null,
-              score: null,
-              status: null,
-              authors: [],
-            }
-          }
-        />
+        <MangaCard manga={manga} />
       </View>
     </MenuView>
   );

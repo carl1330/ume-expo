@@ -63,8 +63,6 @@ export type VolumeContent = {
   pages: PageContent[];
 };
 
-export type MangaMetadataFile = Manga;
-
 export type TopMangaQuery =
   JikanOperations["getTopManga"]["parameters"]["query"];
 export type MangaSearchQuery =

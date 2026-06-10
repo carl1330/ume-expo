@@ -1,14 +1,105 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3c9bbe59-1787-40cc-97a1-b7e24aaacf43",
+  "id": "b30fd9a1-3bef-4d23-ab2f-02a5420bb23d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "volume_progress": {
-      "name": "volume_progress",
+    "manga": {
+      "name": "manga",
       "columns": {
-        "volume_uuid": {
-          "name": "volume_uuid",
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mal_id": {
+          "name": "mal_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "score": {
+          "name": "score",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "synopsis": {
+          "name": "synopsis",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "authors": {
+          "name": "authors",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "cover_updated_at": {
+          "name": "cover_updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "manga_mal_id_idx": {
+          "name": "manga_mal_id_idx",
+          "columns": [
+            "mal_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "volume": {
+      "name": "volume",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
           "type": "text",
           "primaryKey": true,
           "notNull": true,
@@ -21,13 +112,12 @@
           "notNull": true,
           "autoincrement": false
         },
-        "last_page": {
-          "name": "last_page",
-          "type": "integer",
+        "dir_name": {
+          "name": "dir_name",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": 0
+          "autoincrement": false
         },
         "total_pages": {
           "name": "total_pages",
@@ -35,6 +125,68 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "cover_path": {
+          "name": "cover_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "volume_manga_idx": {
+          "name": "volume_manga_idx",
+          "columns": [
+            "manga_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "volume_manga_id_manga_id_fk": {
+          "name": "volume_manga_id_manga_id_fk",
+          "tableFrom": "volume",
+          "tableTo": "manga",
+          "columnsFrom": [
+            "manga_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "volume_progress": {
+      "name": "volume_progress",
+      "columns": {
+        "volume_uuid": {
+          "name": "volume_uuid",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "last_page": {
+          "name": "last_page",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "completed_at": {
           "name": "completed_at",
@@ -52,16 +204,22 @@
           "default": "(unixepoch())"
         }
       },
-      "indexes": {
-        "volume_progress_manga_idx": {
-          "name": "volume_progress_manga_idx",
-          "columns": [
-            "manga_id"
+      "indexes": {},
+      "foreignKeys": {
+        "volume_progress_volume_uuid_volume_uuid_fk": {
+          "name": "volume_progress_volume_uuid_volume_uuid_fk",
+          "tableFrom": "volume_progress",
+          "tableTo": "volume",
+          "columnsFrom": [
+            "volume_uuid"
           ],
-          "isUnique": false
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}

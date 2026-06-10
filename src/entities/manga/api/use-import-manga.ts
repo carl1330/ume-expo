@@ -4,11 +4,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { selectCbzFile } from "@/shared/lib";
 import { mangaLibraryDir } from "@/shared/config";
 import { localMangaQueries } from "./manga-local.queries";
-import { saveMangaMetadata } from "@/shared/api";
+import { volumeQueries } from "./volume.queries";
 import { readMokuroFile } from "./read-mokuro-file";
 import { syncMangaMetadataByTitle } from "./sync-manga-metadata";
 import { extractCbz } from "./extract-cbz";
-import { createVolumeProgress } from "./create-volume-progress";
+import { saveImportedVolume } from "./save-imported-volume";
+import { getLocalMangaMetadata } from "./get-local-manga-metadata";
 
 export type ImportStatus =
   | "idle"
@@ -50,52 +51,34 @@ export function useImportManga(targetId?: string) {
 
       if (!mangaLibraryDir.exists) mangaLibraryDir.create();
 
-      if (targetId) {
-        const destDir = new Directory(mangaLibraryDir, targetId);
-        if (!destDir.exists) destDir.create();
+      const mangaId = targetId ?? mokuro.title_uuid;
+      const isNewManga = (await getLocalMangaMetadata(mangaId)) === null;
 
-        await staging.copy(destDir);
+      const destDir = new Directory(mangaLibraryDir, mangaId);
+      if (!destDir.exists) destDir.create();
 
-        await createVolumeProgress({
-          volumeUuid: mokuro.volume_uuid,
-          mangaId: targetId,
-          totalPages: mokuro.pages.length,
-        });
+      await staging.copy(destDir);
 
-        setImportedId(targetId);
-        setStatus("success");
-      } else {
-        const { title_uuid: uuid, title } = mokuro;
+      await saveImportedVolume({
+        mangaId,
+        mokuro,
+        dirName: staging.name,
+      });
 
-        const destDir = new Directory(mangaLibraryDir, uuid);
-        if (!destDir.exists) destDir.create();
+      await queryClient.invalidateQueries({
+        queryKey: localMangaQueries.list().queryKey,
+      });
+      await queryClient.invalidateQueries({
+        queryKey: volumeQueries.byManga(mangaId).queryKey,
+      });
 
-        await staging.copy(destDir);
+      setImportedId(mangaId);
+      setStatus("success");
 
-        await createVolumeProgress({
-          volumeUuid: mokuro.volume_uuid,
-          mangaId: uuid,
-          totalPages: mokuro.pages.length,
-        });
-
-        saveMangaMetadata(uuid, {
-          id: uuid,
-          malId: null,
-          title,
-          coverUrl: null,
-          score: null,
-          status: null,
-          authors: [],
-        });
-
-        await queryClient.invalidateQueries({
-          queryKey: localMangaQueries.list().queryKey,
-        });
-
-        setImportedId(uuid);
-        setStatus("success");
-
-        syncMangaMetadataByTitle(uuid, title, queryClient).catch(() => {});
+      if (isNewManga) {
+        syncMangaMetadataByTitle(mangaId, mokuro.title, queryClient).catch(
+          () => {},
+        );
       }
     } catch (e) {
       setError((e as Error).message);

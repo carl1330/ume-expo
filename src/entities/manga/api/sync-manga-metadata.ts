@@ -1,5 +1,8 @@
-import { downloadMangaCover, getMangaMetadata, saveMangaMetadata } from "@/shared/api";
+import { eq, sql } from "drizzle-orm";
 import type { QueryClient } from "@tanstack/react-query";
+import { db } from "@/shared/lib";
+import { manga } from "@db/schema";
+import { downloadMangaCover } from "./download-manga-cover";
 import { getMangaSearch } from "./get-manga-search";
 import { localMangaQueries } from "./manga-local.queries";
 
@@ -8,28 +11,34 @@ export async function syncMangaMetadataByTitle(
   title: string,
   queryClient: QueryClient,
 ): Promise<void> {
-  const result = await getMangaSearch({ q: title, page: 1, sfw: true, type: "manga" });
+  const result = await getMangaSearch({
+    q: title,
+    page: 1,
+    sfw: true,
+    type: "manga",
+  });
   const match = result.manga[0];
   if (!match) return;
 
-  const existing = await getMangaMetadata(id);
-  if (!existing) return;
-
-  const coverUri = match.coverUrl
-    ? await downloadMangaCover(id, match.coverUrl)
-    : null;
-
-  const updated = {
-    ...(existing as object),
+  const patch: Record<string, unknown> = {
     malId: match.malId,
-    coverUrl: coverUri,
     score: match.score,
     status: match.status,
-    authors: match.authors,
+    authors: JSON.stringify(match.authors),
+    updatedAt: new Date(),
   };
-  saveMangaMetadata(id, updated);
+
+  if (match.coverUrl) {
+    await downloadMangaCover(id, match.coverUrl);
+    patch.coverUpdatedAt = sql`(unixepoch())`;
+  }
+
+  await db.update(manga).set(patch).where(eq(manga.id, id));
 
   await queryClient.invalidateQueries({
     queryKey: localMangaQueries.metadata(id).queryKey,
+  });
+  await queryClient.invalidateQueries({
+    queryKey: localMangaQueries.list().queryKey,
   });
 }
