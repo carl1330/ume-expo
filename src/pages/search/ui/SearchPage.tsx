@@ -12,7 +12,7 @@ import { mangaQueries, MangaCard } from "@/entities/manga";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 const useNativeSearchBar =
-  Platform.OS === "ios" && Number(Platform.Version) >= 26;
+  Platform.OS === "ios" && parseInt(String(Platform.Version), 10) >= 26;
 
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
