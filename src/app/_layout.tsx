@@ -24,10 +24,16 @@ export default function RootLayout() {
     SystemUI.setBackgroundColorAsync(colors.background);
   }, [colors.background]);
 
+  const navTheme = scheme === "dark" ? DarkTheme : DefaultTheme;
+  const theme = {
+    ...navTheme,
+    colors: { ...navTheme.colors, background: colors.background },
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Providers client={queryClient}>
-        <ThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
+        <ThemeProvider value={theme}>
           <Stack
             screenOptions={{
               contentStyle: { backgroundColor: colors.background },
@@ -51,6 +57,13 @@ export default function RootLayout() {
                 gestureEnabled: true,
                 sheetGrabberVisible: true,
                 sheetAllowedDetents: [1.0],
+              }}
+            />
+            <Stack.Screen
+              name="reader/[mangaId]/[volumeUuid]"
+              options={{
+                headerShown: false,
+                headerTransparent: true,
               }}
             />
           </Stack>
