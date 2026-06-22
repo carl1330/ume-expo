@@ -6,8 +6,8 @@ import {
 import { SafeScreen, Text } from "@/shared/ui";
 import { spacing } from "@/shared/config";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Stack, router } from "expo-router";
-import { useEffect } from "react";
+import { Stack, router, useFocusEffect, useIsFocused } from "expo-router";
+import { useCallback, useEffect } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -23,6 +23,10 @@ export function LocalMangaDetails({ localId }: { localId: string }) {
   const { data: manga, isLoading } = useQuery(
     localMangaQueries.metadata(localId),
   );
+  const { data: volumes = [], refetch } = useQuery(
+    volumeQueries.byManga(localId),
+  );
+
   const { importManga, status, error, importedId } = useImportManga(localId);
 
   useEffect(() => {
@@ -71,7 +75,7 @@ export function LocalMangaDetails({ localId }: { localId: string }) {
       </Stack.Toolbar>
       <ScrollView contentContainerStyle={styles.content}>
         <MangaHeader manga={manga} />
-        <VolumeCarousel mangaId={localId} />
+        <VolumeCarousel mangaId={localId} volumes={volumes} />
       </ScrollView>
     </SafeScreen>
   );

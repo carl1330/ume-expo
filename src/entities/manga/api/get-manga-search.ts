@@ -6,6 +6,13 @@ export const getMangaSearch = async (
   query: MangaSearchQuery,
 ): Promise<MangaWithPagination> => {
   const result = await JikanClient("/manga", { params: { query } });
+  if (result.error) {
+    console.warn(
+      `[jikan] GET /manga (search) failed`,
+      result.error,
+      result.response.status,
+    );
+  }
 
   return {
     manga: (result.data?.data ?? []).map((raw) => mapJikanManga(raw)),

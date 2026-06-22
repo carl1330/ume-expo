@@ -49,6 +49,7 @@ export type Volume = {
   dir: Directory;
   uuid: string;
   cover: string;
+  progress: number;
 };
 
 export type PageContent = {

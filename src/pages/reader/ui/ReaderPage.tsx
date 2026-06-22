@@ -1,4 +1,8 @@
-import { volumeQueries, type Volume, type VolumeContent } from "@/entities/manga";
+import {
+  volumeQueries,
+  type Volume,
+  type VolumeContent,
+} from "@/entities/manga";
 import { updateLastPage } from "../api/update-last-page";
 import { progressQueries } from "../api/progress.queries";
 import { SafeScreen, Text } from "@/shared/ui";
@@ -46,10 +50,16 @@ export function ReaderPage({
     );
   }
 
-  return <VolumeReader volume={volume} />;
+  return <VolumeReader volume={volume} mangaId={mangaId} />;
 }
 
-function VolumeReader({ volume }: { volume: Volume }) {
+function VolumeReader({
+  volume,
+  mangaId,
+}: {
+  volume: Volume;
+  mangaId: string;
+}) {
   const content = useQuery(volumeQueries.content(volume.dir));
   const progress = useQuery(progressQueries.byVolume(volume.uuid));
 
@@ -78,6 +88,7 @@ function VolumeReader({ volume }: { volume: Volume }) {
   return (
     <LoadedVolumeReader
       volume={volume}
+      mangaId={mangaId}
       content={content.data}
       initialPage={progress.data?.lastPage ?? 0}
     />
@@ -86,10 +97,12 @@ function VolumeReader({ volume }: { volume: Volume }) {
 
 function LoadedVolumeReader({
   volume,
+  mangaId,
   content,
   initialPage,
 }: {
   volume: Volume;
+  mangaId: string;
   content: VolumeContent;
   initialPage: number;
 }) {
@@ -137,6 +150,15 @@ function LoadedVolumeReader({
                 completedAt: prev.completedAt ?? (isFinal ? new Date() : null),
               }
             : prev,
+      );
+      queryClient.setQueryData<Volume[]>(
+        volumeQueries.byManga(mangaId).queryKey,
+        (old) =>
+          old?.map((volume) =>
+            volume.uuid === volumeUuid
+              ? { ...volume, progress: page / totalPages }
+              : volume,
+          ),
       );
     },
   });

@@ -9,6 +9,7 @@ export const volumeQueries = {
     queryOptions({
       queryKey: [...volumeQueries.all(), id],
       queryFn: () => getMangaVolumes(id),
+      gcTime: 0,
     }),
   content: (dir: Directory) =>
     queryOptions({

@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   index,
   integer,
@@ -56,9 +56,36 @@ export const volumeProgress = sqliteTable("volume_progress", {
     .default(sql`(unixepoch())`),
 });
 
+export const mangaRelations = relations(manga, ({ many }) => ({
+  volumes: many(volume),
+}));
+
+export const volumeRelations = relations(volume, ({ one }) => ({
+  manga: one(manga, {
+    fields: [volume.mangaId],
+    references: [manga.id],
+  }),
+
+  progress: one(volumeProgress, {
+    fields: [volume.uuid],
+    references: [volumeProgress.volumeUuid],
+  }),
+}));
+
+export const volumeProgressRelations = relations(volumeProgress, ({ one }) => ({
+  volume: one(volume, {
+    fields: [volumeProgress.volumeUuid],
+    references: [volume.uuid],
+  }),
+}));
+
 export type MangaRow = typeof manga.$inferSelect;
 export type NewMangaRow = typeof manga.$inferInsert;
 export type VolumeRow = typeof volume.$inferSelect;
+export type VolumeProgressRow = typeof volumeProgress.$inferSelect;
+export type VolumeWithProgress = VolumeRow & {
+  progress: VolumeProgressRow | null;
+};
 export type NewVolumeRow = typeof volume.$inferInsert;
 export type VolumeProgress = typeof volumeProgress.$inferSelect;
 export type NewVolumeProgress = typeof volumeProgress.$inferInsert;
